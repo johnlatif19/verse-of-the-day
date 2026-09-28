@@ -3,7 +3,7 @@
 
   var CONFIG = {
     apiBase: "/api",
-    dailyVerse: {
+    fallbackVerse: {
       text: "«تَوَكَّلْ عَلَى الرَّبِّ بِكُلِّ قَلْبِكَ، وَعَلَى فَهْمِكَ لاَ تَعْتَمِدْ.»",
       ref: "أمثال 3: 5"
     }
@@ -31,6 +31,11 @@
 
   var els = {};
   var toastTimer = null;
+  var currentVerse = {
+    text: CONFIG.fallbackVerse.text,
+    ref: CONFIG.fallbackVerse.ref,
+    updatedAt: null
+  };
 
   function cacheElements() {
     Object.keys(SELECTORS).forEach(function (key) {
@@ -203,6 +208,35 @@
     if (els.verseDate) els.verseDate.textContent = formatArabicDate();
   }
 
+  function renderVerse(verse) {
+    if (!verse) return;
+    currentVerse = {
+      text: verse.text || CONFIG.fallbackVerse.text,
+      ref: verse.ref || CONFIG.fallbackVerse.ref,
+      updatedAt: verse.updatedAt || null
+    };
+
+    if (els.verseText) els.verseText.textContent = currentVerse.text;
+    if (els.verseRef) els.verseRef.textContent = currentVerse.ref;
+  }
+
+  function loadVerse() {
+    return fetch(CONFIG.apiBase + "/verse/current", {
+      credentials: "include",
+      cache: "no-store"
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("verse_failed");
+        return res.json();
+      })
+      .then(function (data) {
+        renderVerse(data);
+      })
+      .catch(function () {
+        renderVerse(CONFIG.fallbackVerse);
+      });
+  }
+
   function copyText(text) {
     if (navigator.clipboard && window.isSecureContext) {
       return navigator.clipboard.writeText(text).then(
@@ -234,9 +268,11 @@
   }
 
   function getVersePayload() {
-    var text = els.verseText ? els.verseText.textContent.trim() : CONFIG.dailyVerse.text;
-    var ref = els.verseRef ? els.verseRef.textContent.trim() : CONFIG.dailyVerse.ref;
-    return { text: text, ref: ref, full: text + "\n— " + ref };
+    return {
+      text: currentVerse.text,
+      ref: currentVerse.ref,
+      full: currentVerse.text + "\n— " + currentVerse.ref
+    };
   }
 
   function initCopyVerse() {
@@ -510,6 +546,7 @@
     initSmoothScroll();
     initReveal();
     initVerseDate();
+    loadVerse();
     initCopyVerse();
     initShareVerse();
     initNotifications();
