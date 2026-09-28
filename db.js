@@ -1,6 +1,7 @@
 "use strict";
 
-const admin = require("firebase-admin");
+const { initializeApp, cert, getApps } = require("firebase-admin/app");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
 let app = null;
 let db = null;
@@ -8,27 +9,45 @@ let db = null;
 function initFirebase() {
   if (app) return app;
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
-  if (!projectId || !clientEmail || !privateKey) {
-    console.warn("[db] Firebase credentials missing. Falling back to memory store.");
+  if (!serviceAccountJson) {
+    console.warn("[db] FIREBASE_SERVICE_ACCOUNT_KEY missing. Falling back to memory store.");
     return null;
   }
 
-  app = admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: projectId,
-      clientEmail: clientEmail,
-      privateKey: privateKey
-    })
-  });
+  let serviceAccount;
+  try {
+    serviceAccount = JSON.parse(serviceAccountJson);
+  } catch (err) {
+    console.error("[db] Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:", err.message);
+    return null;
+  }
 
-  db = admin.firestore();
-  db.settings({ ignoreUndefinedProperties: true });
+  try {
+    const existing = getApps();
+    if (existing.length > 0) {
+      app = existing[0];
+      db = getFirestore(app);
+      return app;
+    }
 
-  return app;
+    app = initializeApp({
+      credential: cert(serviceAccount)
+    });
+
+    db = getFirestore(app);
+    db.settings({ ignoreUndefinedProperties: true });
+
+    console.log("[db] Firebase initialized for project:", serviceAccount.project_id);
+
+    return app;
+  } catch (err) {
+    console.error("[db] Failed to initialize Firebase:", err.message);
+    app = null;
+    db = null;
+    return null;
+  }
 }
 
 function isEnabled() {
@@ -175,6 +194,20 @@ async function listDeviceIds() {
   }
 }
 
+async function listDeviceSubscriptions() {
+  if (!isEnabled()) {
+    return Array.from(memory.devices.values());
+  }
+
+  try {
+    const snap = await db.collection(DEVICES_COL).get();
+    return snap.docs.map((d) => d.data());
+  } catch (err) {
+    console.error("[db] listDeviceSubscriptions failed:", err.message);
+    return [];
+  }
+}
+
 async function saveNotification(record) {
   if (!isEnabled()) {
     memory.notifications.unshift(record);
@@ -203,7 +236,7 @@ async function markSent(notificationId, deviceId) {
   try {
     await db.collection(NOTIFICATIONS_COL).doc(notificationId).set(
       {
-        sentDeviceIds: admin.firestore.FieldValue.arrayUnion(deviceId)
+        sentDeviceIds: FieldValue.arrayUnion(deviceId)
       },
       { merge: true }
     );
@@ -291,6 +324,7 @@ module.exports = {
   unregisterDevice: unregisterDevice,
   countDevices: countDevices,
   listDeviceIds: listDeviceIds,
+  listDeviceSubscriptions: listDeviceSubscriptions,
   saveNotification: saveNotification,
   markSent: markSent,
   listNotifications: listNotifications,
