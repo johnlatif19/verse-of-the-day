@@ -8,7 +8,7 @@ const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
@@ -149,7 +149,7 @@ function requireAuth(req, res, next) {
 function requireAdminPage(req, res, next) {
   const payload = verifyToken(req);
   if (!payload) {
-    return res.redirect("/login.html");
+    return res.redirect("/login");
   }
   next();
 }
@@ -360,8 +360,24 @@ app.get("/api/notifications/:id", requireAuth, (req, res) => {
 
 const PUBLIC_DIR = path.join(__dirname, "public");
 
-app.get("/dashboard.html", requireAdminPage, (req, res) => {
+app.get("/login", (req, res) => {
+  const payload = verifyToken(req);
+  if (payload) {
+    return res.redirect("/dashboard");
+  }
+  res.sendFile(path.join(PUBLIC_DIR, "login.html"));
+});
+
+app.get("/dashboard", requireAdminPage, (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, "dashboard.html"));
+});
+
+app.get("/login.html", (req, res) => {
+  res.redirect(301, "/login");
+});
+
+app.get("/dashboard.html", (req, res) => {
+  res.redirect(301, "/dashboard");
 });
 
 app.use(express.static(PUBLIC_DIR, { index: "index.html", extensions: false }));
