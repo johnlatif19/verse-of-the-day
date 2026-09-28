@@ -58,7 +58,7 @@
   function redirectToLogin() {
     if (isRedirecting) return;
     isRedirecting = true;
-    window.location.replace("/login.html");
+    window.location.replace("/login");
   }
 
   function showToast(message, duration) {
