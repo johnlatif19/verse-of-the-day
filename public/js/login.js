@@ -55,7 +55,10 @@
       input.type = isVisible ? "password" : "text";
       btn.classList.toggle("is-active", !isVisible);
       btn.setAttribute("aria-pressed", String(!isVisible));
-      btn.setAttribute("aria-label", !isVisible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور");
+      btn.setAttribute(
+        "aria-label",
+        !isVisible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
+      );
       input.focus();
     });
   }
@@ -117,7 +120,7 @@
         .then(function (result) {
           if (result.ok) {
             showToast("تم تسجيل الدخول بنجاح");
-            window.location.href = "/dashboard.html";
+            window.location.replace("/dashboard");
             return;
           }
 
