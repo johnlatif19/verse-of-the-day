@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#faf8f3">
+<meta name="robots" content="noindex, nofollow">
+<title>لوحة التحكم | آية اليوم</title>
+
+<link rel="icon" type="image/png" href="https://i.postimg.cc/2SvchTqS/verse-of-the-day.png">
+<link rel="apple-touch-icon" href="https://i.postimg.cc/2SvchTqS/verse-of-the-day.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/public/css/dashboard.css">
+</head>
+<body>
+
+<header class="dash-header">
+  <div class="container dash-header-inner">
+
+    <div class="dash-brand">
+      <img src="https://i.postimg.cc/2SvchTqS/verse-of-the-day.png" alt="آية اليوم" width="40" height="40">
+      <div class="dash-brand-text">
+        <span class="dash-brand-title">لوحة التحكم</span>
+        <span class="dash-brand-sub">آية اليوم</span>
+      </div>
+    </div>
+
+    <div class="dash-user">
+      <span class="dash-user-name" id="adminName">المسؤول</span>
+      <button type="button" class="btn btn-ghost btn-sm" id="logoutBtn">تسجيل الخروج</button>
+    </div>
+
+  </div>
+</header>
+
+<main class="dash-main">
+  <div class="container">
+
+    <section class="dash-loading" id="dashLoading" aria-live="polite">
+      <div class="skeleton skeleton-title"></div>
+      <div class="stats-grid">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </section>
+
+    <div class="dash-content" id="dashContent" hidden>
+
+      <section class="dash-section">
+        <header class="dash-section-head">
+          <h2 class="dash-section-title">نظرة عامة</h2>
+        </header>
+
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-label">إجمالي الإشعارات</span>
+            <span class="stat-value" id="statTotalNotifications">0</span>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-label">إجمالي الأجهزة المسجلة</span>
+            <span class="stat-value" id="statTotalDevices">0</span>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-label">آخر إشعار</span>
+            <span class="stat-value stat-value-sm" id="statLastNotification">—</span>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-label">حالة خدمة الإشعارات</span>
+            <span class="stat-value stat-value-sm" id="statServiceStatus">—</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="dash-section">
+        <header class="dash-section-head">
+          <h2 class="dash-section-title">آية اليوم الحالية</h2>
+          <p class="dash-section-desc">هذه الآية تظهر لجميع المستخدمين على الصفحة الرئيسية.</p>
+        </header>
+
+        <form class="verse-editor" id="verseForm" novalidate>
+
+          <div class="field">
+            <label for="verseTextInput">نص الآية</label>
+            <textarea
+              id="verseTextInput"
+              name="text"
+              rows="4"
+              required
+              aria-required="true"
+            ></textarea>
+          </div>
+
+          <div class="field">
+            <label for="verseRefInput">المرجع</label>
+            <input
+              type="text"
+              id="verseRefInput"
+              name="ref"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="verse-editor-actions">
+            <button type="submit" class="btn btn-primary" id="saveVerseBtn">
+              <span class="btn-label">حفظ الآية</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+            <span class="field-hint" id="verseUpdatedAt"></span>
+          </div>
+
+        </form>
+      </section>
+
+      <section class="dash-section">
+        <header class="dash-section-head">
+          <h2 class="dash-section-title">إرسال إشعار</h2>
+          <p class="dash-section-desc">سيتم إرسال الإشعار إلى جميع الأجهزة المسجلة.</p>
+        </header>
+
+        <form class="notif-composer" id="notifForm" novalidate>
+
+          <div class="field">
+            <label for="notifTitleInput">العنوان</label>
+            <input
+              type="text"
+              id="notifTitleInput"
+              name="title"
+              value="آية اليوم"
+              maxlength="80"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="field">
+            <label for="notifBodyInput">الرسالة</label>
+            <textarea
+              id="notifBodyInput"
+              name="body"
+              rows="5"
+              required
+              aria-required="true"
+              placeholder="«تَوَكَّلْ عَلَى الرَّبِّ بِكُلِّ قَلْبِكَ،&#10;وَعَلَى فَهْمِكَ لاَ تَعْتَمِدْ.»"
+            ></textarea>
+          </div>
+
+          <div class="field">
+            <label for="notifRefInput">المرجع</label>
+            <input
+              type="text"
+              id="notifRefInput"
+              name="ref"
+              placeholder="أمثال 3:5"
+              maxlength="80"
+            >
+          </div>
+
+          <div class="notif-composer-actions">
+            <button type="submit" class="btn btn-primary" id="sendNotifBtn">
+              <span class="btn-label">إرسال الإشعار</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <section class="dash-section">
+        <header class="dash-section-head">
+          <h2 class="dash-section-title">سجل الإشعارات</h2>
+        </header>
+
+        <div class="history-toolbar">
+          <input
+            type="search"
+            id="historySearch"
+            class="history-search"
+            placeholder="ابحث في السجل..."
+            aria-label="بحث في سجل الإشعارات"
+          >
+        </div>
+
+        <div class="history-empty" id="historyEmpty" hidden>
+          <p>لا توجد إشعارات مرسلة بعد.</p>
+        </div>
+
+        <div class="history-table-wrap" id="historyTableWrap" hidden>
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th scope="col">التاريخ</th>
+                <th scope="col">العنوان</th>
+                <th scope="col">الرسالة</th>
+                <th scope="col">عدد الأجهزة</th>
+                <th scope="col">الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+
+        <div class="history-cards" id="historyCards" hidden></div>
+      </section>
+
+    </div>
+
+  </div>
+</main>
+
+<div class="modal" id="confirmModal" hidden>
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <h3 class="modal-title" id="confirmTitle">هل تريد إرسال هذه الآية إلى جميع الأجهزة المسجلة؟</h3>
+    <p class="modal-text" id="confirmText"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="confirmCancel">إلغاء</button>
+      <button type="button" class="btn btn-primary" id="confirmSend">إرسال</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="/public/js/dashboard.js" defer></script>
+</body>
+</html>
