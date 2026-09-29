@@ -16,6 +16,10 @@
       "dest": "server.js"
     },
     {
+      "src": "/privacy-policy",
+      "dest": "server.js"
+    },
+    {
       "src": "/login",
       "dest": "server.js"
     },
