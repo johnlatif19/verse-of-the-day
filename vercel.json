@@ -17,7 +17,7 @@
     },
     {
       "src": "/privacy-policy",
-      "dest": "server.js"
+      "dest": "/public/privacy-policy.html"
     },
     {
       "src": "/login",
